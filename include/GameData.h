@@ -15,8 +15,8 @@ typedef struct {
     char name[20];
     char symbol;    // 显示符号
 
-    int addHp;       // 增加生命值
-    int addAtk;      // 增加攻击力
+    float addHp;       // 增加生命值
+    float addAtk;      // 增加攻击力
     float addSpeed;  // 增加速度
     int duration;    // 持续时间 (帧)
     int spawnRate;   // 生成权重
