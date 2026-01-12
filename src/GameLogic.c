@@ -14,6 +14,8 @@ int cameraX = 0, cameraY = 0;
 int frameCount = 0;
 int survivalSeconds = 0;
 
+int minDistFormPlayerToSpawn = 20;
+
 typedef struct
 {
     int x, y;
@@ -375,8 +377,8 @@ void SpawnDirector()
                 continue;
             }
 
-            // 必须离玩家一定距离 (比如20格)
-            if (abs(x - player.x) + abs(y - player.y) < 20)
+            // 必须离玩家一定距离
+            if (abs(x - player.x) + abs(y - player.y) < minDistFormPlayerToSpawn)
             {
                 tries++;
                 continue;
