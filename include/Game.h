@@ -17,6 +17,10 @@ typedef enum
     HARD,
 } Level;
 
+extern int currentUserIndex;
+
+extern Level gameLevel;
+
 // 登录系统
 void Login();
 

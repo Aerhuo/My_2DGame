@@ -8,6 +8,7 @@
 // 速度单位: 每秒移动的格子数
 // 时间的单位是帧
 
+#include <stdbool.h>
 
 // 道具属性配置模板
 typedef struct {
@@ -51,12 +52,14 @@ typedef struct
 
     float speed;
     int moveTimer; // 移动计时器
+
+    bool canPenetrateObstacles;
 } Character;
 
 extern Character player;
 
 extern Character enemies[MAX_ENEMIES_COUNT];
-extern const int enemyCount;
+extern int enemyCount;
 
 void ItemApply(ItemConfig item);
 

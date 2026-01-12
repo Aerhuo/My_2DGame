@@ -26,6 +26,11 @@ const int itemConfigCount = sizeof(itemConfigs) / sizeof(itemConfigs[0]);
 
 // 名字 显示符号 基础生命值 基础攻击力 基础速度 (每秒移动的格子数) 生成权重
 const CharacterConfig characterConfigs[] = {
+    {"李伟峰", '@', 100.0f, 20.0f, 6.0f, 0}, // 玩家
+
+    {"小怪1", 'g', 30.0f, 5.0f, 1.0f, 50},
+    {"小怪2", 'h', 50.0f, 10.0f, 1.5f, 30},
+    {"大怪", 'G', 100.0f, 20.0f, 0.5f, 20}
 };
 
 const int characterConfigCount = sizeof(characterConfigs) / sizeof(characterConfigs[0]);
@@ -36,15 +41,3 @@ Character player;
 // 敌人实例数组
 Character enemies[MAX_ENEMIES_COUNT];
 int enemyCount = 0;
-
-void InitializePlayer()
-{
-    CharacterConfig pc = characterConfigs[0]; // 第一个是玩家配置
-    player.config = pc;
-    player.x = SCREEN_WIDTH / 2;
-    player.y = SCREEN_HEIGHT / 2;
-    player.hp = pc.baseHp;
-    player.atk = pc.baseAtk;
-    player.speed = pc.baseSpeed;
-    player.moveTimer = 0;
-}

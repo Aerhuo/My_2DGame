@@ -4,7 +4,6 @@
 #include "DataManager.h"
 
 const char* USER_FILE = "users.txt";
-const char* SCORE_FILE = "scores.txt";
 
 UserData* users = NULL;
 int userCount = 0;

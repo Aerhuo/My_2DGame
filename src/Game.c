@@ -6,6 +6,7 @@
 #include "Game.h"
 #include "Renderer.h"
 #include "DataManager.h"
+#include "GameLogic.h"
 int currentUserIndex = -1;
 
 // 登录系统
@@ -185,19 +186,69 @@ bool isGameInitialized = false;
 // 初始化游戏
 void InitializeGame()
 {
-    InitializePlayer();
+    InitGameLogic();
 }
 
 // 游戏中帧逻辑
 void RunGameFrame(GameState *state)
 {
+    // 初始化 (仅进行一次)
     if (!isGameInitialized)
     {
         InitializeGame();
         isGameInitialized = true;
     }
 
-    
+    // 更新游戏逻辑 (输入、移动、战斗、AI)
+    bool isAlive = UpdateGameLogic(); // 返回玩家是否存活
+
+    // 渲染游戏画面 (地图、实体、UI)
+    RenderGameLogic();
+
+    // 死亡结算处理
+    if (!isAlive)
+    {
+        // 覆盖绘制“游戏结束”界面
+        
+        // 绘制弹窗背景
+        for(int y=12; y<=20; y++) {
+            DrawStrCenter(y, "                              "); // 清空中间区域
+        }
+
+        DrawStrCenter(13, "==========================");
+        DrawStrCenter(15, "      GAME OVER         ");
+        DrawStrCenter(17, "==========================");
+        
+        char scoreMsg[64];
+        sprintf(scoreMsg, "本次生存: %d 秒", survivalSeconds);
+        DrawStrCenter(19, scoreMsg);
+        
+        DrawStrCenter(25, "按任意键查看榜单...");
+
+        // 强制立即刷新屏幕，让玩家看到 Game Over
+        FlushScreen();
+
+        // 防止玩家在死前疯狂按键导致误触跳过结算
+        Sleep(1000); 
+        while (_kbhit()) _getch(); // 清空键盘缓冲区
+
+        // 等待用户按键
+        _getch();
+
+        // === 分数结算 ===
+        // 如果本次分数比历史最高分高，则更新
+        if (survivalSeconds > users[currentUserIndex].score) {
+            users[currentUserIndex].score = survivalSeconds;
+        }
+        
+        // 保存数据到文件
+        SaveUserData();
+
+        *state = STATE_Score; // 跳转到分数榜
+        
+        // 重置初始化标记
+        isGameInitialized = false; 
+    }
 }
 
 char* settingsOptions[] = {
@@ -277,6 +328,11 @@ void RunScoreFrame(GameState *state)
             {
                 if (users[j].score < users[j + 1].score)
                 {
+                    if (j + 1 == currentUserIndex)
+                        currentUserIndex = j;
+                    else if (j == currentUserIndex)
+                        currentUserIndex = j + 1;
+                    
                     UserData temp = users[j];
                     users[j] = users[j + 1];
                     users[j + 1] = temp;
