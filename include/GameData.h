@@ -2,6 +2,8 @@
 #define GAMEDATA_H
 
 #define MAX_ENEMIES_COUNT 100
+#define MAX_ITEMS_COUNT 50
+#define MAX_ACTIVE_BUFFS 8
 #define FPS 30
 #define SEC(s) ((int)((s) * FPS))
 
@@ -9,6 +11,18 @@
 // 时间的单位是帧
 
 #include <stdbool.h>
+
+// BUFF 类型
+typedef enum {
+    None
+} BuffType;
+
+typedef struct {
+    BuffType type;  // 类型 ID
+    int timer;      // 剩余时间 (帧)
+    int value;
+    bool active;    // 是否激活
+} Buff;
 
 // 道具属性配置模板
 typedef struct {
@@ -54,7 +68,20 @@ typedef struct
     int moveTimer; // 移动计时器
 
     bool canPenetrateObstacles;
+    Buff buffs[MAX_ACTIVE_BUFFS]; 
 } Character;
+
+// 给目标添加一个 Buff (自动处理叠加或刷新时间)
+void AddBuff(Character* target, BuffType type, int duration, int value);
+
+// 检查目标是否有某个 Buff (返回 true/false)
+bool HasBuff(Character* target, BuffType type);
+
+// 移除某个 Buff
+void RemoveBuff(Character* target, BuffType type);
+
+// 每帧更新 Buff 状态
+void UpdateBuffs(Character* target);
 
 extern Character player;
 
