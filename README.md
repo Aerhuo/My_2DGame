@@ -30,7 +30,6 @@ My_2DGame/
 │   ├── Renderer.c       # 渲染引擎底层实现
 │   └── Main.c           # 程序入口
 ├── users.txt            # (自动生成) 用户存档
-└── scores.txt           # (自动生成) 排行榜数据
 ```
 
 ---
