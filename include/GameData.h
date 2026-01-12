@@ -14,7 +14,9 @@
 
 // BUFF 类型
 typedef enum {
-    None
+    ADD_ENEMY_SPAWN_TIME, //增加敌人生成时间
+    NO_OBSTACLE,//穿墙
+    RANGE_ATTACK, //远程攻击
 } BuffType;
 
 typedef struct {

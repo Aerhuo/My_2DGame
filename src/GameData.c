@@ -1,8 +1,8 @@
 #include "GameData.h"
 #include "Renderer.h"
-
+#include<string.h>
 const ItemConfig itemConfigs[] = {
-    // 特殊物品(增加下波敌人出现的速度)
+    // 特殊物品(增加下波敌人出现的时间)
     {"闹钟", '@', 0, 0, 0, 0, 25},
 
     // 攻击类物品（永久增益）
@@ -21,8 +21,8 @@ const ItemConfig itemConfigs[] = {
     {"手机", 'P', 0, 0, 1.5f, 0, 25},
 
     // 时间限制类物品
-    {"宿舍钥匙", '&', 0, 0, 0, SEC(10), 25}, // 10秒
-    {"吹风机", '%', 0, 0, 0, SEC(30), 25},   // 30秒
+    {"宿舍钥匙", '&', 0, 0, 0, SEC(10), 25}, // 10秒穿墙
+    {"吹风机", '%', 0, 0, 0, SEC(30), 25},   // 30秒远程攻击
 };
 
 const int itemConfigCount = sizeof(itemConfigs) / sizeof(itemConfigs[0]);
@@ -156,9 +156,7 @@ void ItemApply(ItemConfig item)
 {
     if (item.addHp > 0)
     {
-        player.hp += item.addHp;
-        if (player.hp > player.config.baseHp)
-            player.hp = player.config.baseHp;
+        player.hp = min(player.hp + item.addHp, player.config.baseHp);
     }
     if (item.addAtk > 0)
     {
@@ -167,5 +165,21 @@ void ItemApply(ItemConfig item)
     if (item.addSpeed > 0)
     {
         player.speed += item.addSpeed;
+    }
+
+    if(item.duration > 0)
+    {
+        if(!strcmp(item.name, "闹钟"))
+        {
+            AddBuff(&player, ADD_ENEMY_SPAWN_TIME, item.duration, 0);
+        }
+        else if(!strcmp(item.name, "宿舍钥匙"))
+        {
+            AddBuff(&player, NO_OBSTACLE, item.duration, 0);
+        }
+        else if(!strcmp(item.name, "吹风机"))
+        {
+            AddBuff(&player, RANGE_ATTACK, item.duration, 0);
+        }
     }
 }
