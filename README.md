@@ -19,7 +19,7 @@
 My_2DGame/
 ├── CMakeLists.txt       # 项目构建配置（不要动！）
 ├── include/             # 头文件 (.h)
-│   ├── DataManager.h    # 账号与存档管理 (Save/Load)
+│   ├── DataManager.h    # 游戏核心数据
 │   ├── Game.h           # 游戏核心流程控制 (State Machine)
 │   ├── GameData.h       # 游戏数值定义 (道具/怪物/主角结构)
 │   └── Renderer.h       # 绘图引擎接口 (所有屏幕输出必须调这里)
@@ -30,7 +30,6 @@ My_2DGame/
 │   ├── Renderer.c       # 渲染引擎底层实现
 │   └── Main.c           # 程序入口
 ├── users.txt            # (自动生成) 用户存档
-└── scores.txt           # (自动生成) 排行榜数据
 ```
 
 ---
