@@ -17,7 +17,9 @@ void Login()
 
     while (1)
     {
+        // 清屏
         system("cls");
+
         printf("========================================\n");
         printf("      李伟峰梦境实现者 - 登录系统    \n");
         printf("========================================\n");
@@ -79,6 +81,8 @@ void Login()
                     printf("\n错误: 用户名已存在. \n");
                 }
             }
+
+            // 等待用户按键继续
             system("pause");
         }
     }
@@ -176,10 +180,24 @@ void RunMenuFrame(GameState *state)
     }
 }
 
+bool isGameInitialized = false;
+
+// 初始化游戏
+void InitializeGame()
+{
+    InitializePlayer();
+}
+
 // 游戏中帧逻辑
 void RunGameFrame(GameState *state)
 {
+    if (!isGameInitialized)
+    {
+        InitializeGame();
+        isGameInitialized = true;
+    }
 
+    
 }
 
 char* settingsOptions[] = {
@@ -242,24 +260,31 @@ void RunSettingsFrame(GameState *state)
     }
 }
 
+bool isSorted = false;
+
 // 分数榜帧逻辑
 void RunScoreFrame(GameState *state)
 {
     DrawStrCenter(5, "== 分数榜 ==");
 
-    // 显示前10名
-    // 冒泡排序
-    for (int i = 0; i < userCount - 1; i++)
+    if (!isSorted)
     {
-        for (int j = 0; j < userCount - i - 1; j++)
+        // 显示前10名
+        // 冒泡排序
+        for (int i = 0; i < userCount - 1; i++)
         {
-            if (users[j].score < users[j + 1].score)
+            for (int j = 0; j < userCount - i - 1; j++)
             {
-                UserData temp = users[j];
-                users[j] = users[j + 1];
-                users[j + 1] = temp;
+                if (users[j].score < users[j + 1].score)
+                {
+                    UserData temp = users[j];
+                    users[j] = users[j + 1];
+                    users[j + 1] = temp;
+                }
             }
         }
+
+        isSorted = true;
     }
 
     int displayCount = userCount < MAX_SCORES ? userCount : MAX_SCORES;

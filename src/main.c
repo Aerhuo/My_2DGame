@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "Game.h"
 #include "DataManager.h"
+#include "GameData.h"
 
 int main()
 {
@@ -36,7 +37,7 @@ int main()
         }
 
         FlushScreen();
-        Sleep(33); // 30 FPS
+        Sleep(1000 / FPS);
     }
 
     SaveUserData();

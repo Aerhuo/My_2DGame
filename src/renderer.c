@@ -55,7 +55,7 @@ int GetStrWidth(const char *str)
     while (str[i] != '\0')
     {
         // 简单处理中文字符宽度为2，英文字符宽度为1
-        if (str[i] < 128)
+        if ((unsigned char)str[i] < 128)
         {
             width += 1;
             i++;
