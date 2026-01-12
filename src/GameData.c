@@ -43,12 +43,43 @@ const CharacterConfig characterConfigs[] = {
 
 const int characterConfigCount = sizeof(characterConfigs) / sizeof(characterConfigs[0]);
 
+Item items[MAX_ITEMS_COUNT];
+int itemCount = 0;
+
 // 玩家
 Character player;
 
 // 敌人数组
 Character enemies[MAX_ENEMIES_COUNT];
 int enemyCount = 0;
+
+// 移除怪物的标准实现
+void RemoveEnemy(int index)
+{
+    if (index < 0 || index >= enemyCount) return;
+
+    // 如果要删除的不是最后一个，就把最后一个移过来覆盖它
+    if (index != enemyCount - 1)
+    {
+        enemies[index] = enemies[enemyCount - 1];
+    }
+    
+    // 数量减一
+    enemyCount--;
+}
+
+// 移除物品的标准实现
+void RemoveItem(int index)
+{
+    if (index < 0 || index >= itemCount) return;
+
+    if (index != itemCount - 1)
+    {
+        items[index] = items[itemCount - 1];
+    }
+
+    itemCount--;
+}
 
 void AddBuff(Character *target, BuffType type, int duration, int value)
 {

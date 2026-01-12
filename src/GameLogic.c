@@ -234,29 +234,49 @@ void MovePlayer(int dx, int dy)
     int nx = player.x + dx;
     int ny = player.y + dy;
 
-    // 撞墙/边界检查
+    // 1. 撞墙/边界检查
     if (nx < 0 || nx >= MAP_WIDTH || ny < 0 || ny >= MAP_HEIGHT)
         return;
+    
+    // 如果你使用了 Buff 系统，建议将 !player.canPenetrateObstacles 改为 !HasBuff(&player, BUFF_PHASING)
     if (worldMap[ny][nx] == TILE_WALL && !player.canPenetrateObstacles)
         return;
 
-    // 攻击判定：如果目标格有怪
+    // 2. 攻击判定：如果目标格有怪
     for (int i = 0; i < enemyCount; i++)
     {
         if (enemies[i].x == nx && enemies[i].y == ny)
         {
             // 造成伤害
             enemies[i].hp -= player.atk;
+            
+            // 怪物死亡逻辑
             if (enemies[i].hp <= 0)
             {
-                // 怪物死亡逻辑：将最后一个怪物移到当前位置，数量-1
-                enemies[i] = enemies[enemyCount - 1];
-                enemyCount--;
+                // 调用 GameData.c 提供的移除接口 (Swap and Pop)
+                RemoveEnemy(i);
             }
             return; // 攻击了就不移动
         }
     }
 
+    // 3. 物品拾取判定 (新增逻辑)
+    // 检查目标位置是否有物品
+    for (int i = 0; i < itemCount; i++)
+    {
+        if (items[i].x == nx && items[i].y == ny)
+        {
+            // 激活物品效果
+            ItemApply(items[i].config);
+
+            // 从地图上移除物品
+            RemoveItem(i);
+            
+            i--; 
+        }
+    }
+
+    // 4. 执行移动
     player.x = nx;
     player.y = ny;
 }

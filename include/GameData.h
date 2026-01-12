@@ -57,6 +57,14 @@ extern const int characterConfigCount;
 
 typedef struct
 {
+    ItemConfig config;
+
+    int x, y;
+} Item;
+
+
+typedef struct
+{
     CharacterConfig config;
 
     int x, y; // 位置
@@ -71,6 +79,16 @@ typedef struct
     Buff buffs[MAX_ACTIVE_BUFFS]; 
 } Character;
 
+extern Item items[MAX_ITEMS_COUNT];
+extern int itemCount;
+
+extern Character player;
+
+extern Character enemies[MAX_ENEMIES_COUNT];
+extern int enemyCount;
+
+void ItemApply(ItemConfig item);
+
 // 给目标添加一个 Buff (自动处理叠加或刷新时间)
 void AddBuff(Character* target, BuffType type, int duration, int value);
 
@@ -83,11 +101,10 @@ void RemoveBuff(Character* target, BuffType type);
 // 每帧更新 Buff 状态
 void UpdateBuffs(Character* target);
 
-extern Character player;
+// 移除指定下标的怪物
+void RemoveEnemy(int index);
 
-extern Character enemies[MAX_ENEMIES_COUNT];
-extern int enemyCount;
-
-void ItemApply(ItemConfig item);
+// 移除指定下标的物品
+void RemoveItem(int index);
 
 #endif
