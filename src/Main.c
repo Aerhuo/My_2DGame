@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <windows.h>
 #include "Renderer.h"
 #include "Game.h"
