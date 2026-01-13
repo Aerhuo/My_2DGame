@@ -7,6 +7,10 @@
 
 int main()
 {
+    // 设置控制台代码页为UTF-8
+    SetConsoleOutputCP(65001);
+    SetConsoleCP(65001);
+    
     // 设置随机数种子
     srand((unsigned int)time(NULL));
 
