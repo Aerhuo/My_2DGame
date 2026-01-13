@@ -211,19 +211,19 @@ void RunGameFrame(GameState *state)
         // 覆盖绘制“游戏结束”界面
         
         // 绘制弹窗背景
-        for(int y=12; y<=20; y++) {
-            DrawStrCenter(y, "                              "); // 清空中间区域
+        for(int y=7; y<=15; y++) {
+            DrawStr(MAP_WIDTH / 2 - 12, y, "                              "); // 清空中间区域
         }
 
-        DrawStrCenter(13, "==========================");
-        DrawStrCenter(15, "      GAME OVER         ");
-        DrawStrCenter(17, "==========================");
+        DrawStr(MAP_WIDTH / 2 - 12, 8, "==========================");
+        DrawStr(MAP_WIDTH / 2 - 10, 10, "      GAME OVER         ");
+        DrawStr(MAP_WIDTH / 2 - 12, 12, "==========================");
         
         char scoreMsg[64];
         sprintf(scoreMsg, "本次生存: %d 秒", survivalSeconds);
-        DrawStrCenter(19, scoreMsg);
+        DrawStr(MAP_WIDTH / 2 - 10, 14, scoreMsg);
         
-        DrawStrCenter(25, "按任意键查看榜单...");
+        DrawStr(MAP_WIDTH / 2 - 10, 20, "按任意键查看榜单...");
 
         // 强制立即刷新屏幕，让玩家看到 Game Over
         FlushScreen();
