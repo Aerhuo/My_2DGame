@@ -196,7 +196,7 @@ void ItemApply(ItemConfig item)
     }
     if (item.addSpeed > 0)
     {
-        player.speed += item.addSpeed;
+        player.speed = fmin(player.speed + item.addSpeed, MAX_SPEED);
     }
 
     if (item.duration > 0)
