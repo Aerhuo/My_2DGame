@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <time.h>
 #include "Renderer.h"
 #include "Game.h"
 #include "DataManager.h"
@@ -6,6 +7,9 @@
 
 int main()
 {
+    // 设置随机数种子
+    srand((unsigned int)time(NULL));
+
     LoadUserData();
     Login();
 

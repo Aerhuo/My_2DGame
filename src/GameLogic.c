@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <conio.h>
+#include <string.h>
 #include "GameLogic.h"
 #include "GameData.h"
 #include "Renderer.h"
@@ -14,8 +15,10 @@ int cameraX = 0, cameraY = 0;
 int frameCount = 0;
 int survivalSeconds = 0;
 
-int minDistFormPlayerToSpawn = 20;
+int minDistFormPlayerToSpawnEnemy = 20;
+int minDistFormPlayerToSpawnItem = 2;
 int spawnEnemyTimer = 0;
+int spawnItemTimer = 0;
 
 typedef struct
 {
@@ -26,6 +29,8 @@ Point bfsQueue[MAP_WIDTH * MAP_HEIGHT];
 void GenerateMap();
 void UpdateCamera();
 void RunBFS();
+bool SpawnItem(int configIndex, int x, int y);
+bool SpawnEnemy(int configIndex, int x, int y);
 void SpawnDirector();
 void MovePlayer(int dx, int dy);
 void UpdateEnemies();
@@ -36,6 +41,7 @@ void InitGameLogic()
     frameCount = 0;
     survivalSeconds = 0;
     enemyCount = 0; // 清空敌人
+    itemCount = 0;  // 清空物品
 
     // 初始化玩家 (初始位置为地图中心)
     player.config = characterConfigs[0];
@@ -52,41 +58,65 @@ void InitGameLogic()
     UpdateCamera();
 }
 
-bool UpdateGameLogic() {
+bool UpdateGameLogic()
+{
     frameCount++;
-    if (frameCount % FPS == 0) survivalSeconds++;
+    if (frameCount % FPS == 0)
+        survivalSeconds++;
+    
     // 累加计时器
     player.moveTimer++;
-    
+
     // 计算玩家行动阈值
     float safeSpeed = (player.speed < .1f) ? .1f : player.speed;
     int playerMoveThreshold = (int)(FPS / safeSpeed);
-    if (playerMoveThreshold < 1) playerMoveThreshold = 1;
+    if (playerMoveThreshold < 1)
+        playerMoveThreshold = 1;
 
-    // 3. 处理输入
-    if (_kbhit()) {
+    // 处理输入
+    if (_kbhit())
+    {
         char key = _getch();
 
         // 只有当计时器 超过 阈值时，才允许移动
-        if (player.moveTimer >= playerMoveThreshold) {
+        if (player.moveTimer >= playerMoveThreshold)
+        {
             bool moved = false;
-            
-            if (key == 'w' || key == 'W') { MovePlayer(0, -1); moved = true; }
-            else if (key == 's' || key == 'S') { MovePlayer(0, 1); moved = true; }
-            else if (key == 'a' || key == 'A') { MovePlayer(-1, 0); moved = true; }
-            else if (key == 'd' || key == 'D') { MovePlayer(1, 0); moved = true; }
+
+            if (key == 'w' || key == 'W')
+            {
+                MovePlayer(0, -1);
+                moved = true;
+            }
+            else if (key == 's' || key == 'S')
+            {
+                MovePlayer(0, 1);
+                moved = true;
+            }
+            else if (key == 'a' || key == 'A')
+            {
+                MovePlayer(-1, 0);
+                moved = true;
+            }
+            else if (key == 'd' || key == 'D')
+            {
+                MovePlayer(1, 0);
+                moved = true;
+            }
 
             // 只有真正发生移动尝试时，才重置计时器
-            if (moved) {
+            if (moved)
+            {
                 player.moveTimer = 0;
             }
         }
     }
-    
-    // 2. 更新 AI 寻路图 (每10帧计算一次)
-    if (frameCount % 10 == 0) RunBFS();
 
-    // 3. 怪物行为
+    // 更新 AI 寻路图 (每10帧计算一次)
+    if (frameCount % 10 == 0)
+        RunBFS();
+
+    // 怪物行为
     UpdateEnemies();
 
     // 刷新系统
@@ -117,6 +147,17 @@ void RenderGameLogic()
                     c = ' ';
             }
             DrawChar(vx, vy, c);
+        }
+    }
+
+    // 绘制物品
+    for (int i = 0; i < itemCount; i++)
+    {
+        int sx = items[i].x - cameraX;
+        int sy = items[i].y - cameraY;
+        if (sx >= 0 && sx < VIEWPORT_WIDTH && sy >= 0 && sy < VIEWPORT_HEIGHT)
+        {
+            DrawChar(sx, sy, items[i].config.symbol);
         }
     }
 
@@ -238,7 +279,7 @@ void MovePlayer(int dx, int dy)
     // 撞墙/边界检查
     if (nx < 0 || nx >= MAP_WIDTH || ny < 0 || ny >= MAP_HEIGHT)
         return;
-    
+
     if (worldMap[ny][nx] == TILE_WALL && !player.canPenetrateObstacles)
         return;
 
@@ -249,7 +290,7 @@ void MovePlayer(int dx, int dy)
         {
             // 造成伤害
             enemies[i].hp -= player.atk;
-            
+
             // 怪物死亡逻辑
             if (enemies[i].hp <= 0)
             {
@@ -270,8 +311,8 @@ void MovePlayer(int dx, int dy)
 
             // 从地图上移除物品
             RemoveItem(i);
-            
-            i--; 
+
+            i--;
         }
     }
 
@@ -314,7 +355,8 @@ void UpdateEnemies()
             if (nx >= 0 && nx < MAP_WIDTH && ny >= 0 && ny < MAP_HEIGHT)
             {
                 // 墙壁碰撞检查
-                if (worldMap[ny][nx] == TILE_WALL) continue;
+                if (worldMap[ny][nx] == TILE_WALL)
+                    continue;
 
                 // 寻路判断
                 if (distMap[ny][nx] < bestDist)
@@ -353,35 +395,119 @@ void UpdateEnemies()
     }
 }
 
+// 添加物品实例
+bool SpawnItem(int configIndex, int x, int y)
+{
+    // 边界检查
+    if (itemCount >= MAX_ITEMS_COUNT)
+        return false;
+    if (configIndex < 0 || configIndex >= itemConfigCount)
+        return false;
+
+    // 获取指针
+    Item *it = &items[itemCount];
+
+    // 加载配置数据
+    it->config = itemConfigs[configIndex];
+    it->x = x;
+    it->y = y;
+
+    itemCount++;
+    return true;
+}
+
+// 添加怪物实例
+bool SpawnEnemy(int configIndex, int x, int y)
+{
+    // 边界检查
+    if (enemyCount >= MAX_ENEMIES_COUNT)
+        return false;
+    if (configIndex < 0 || configIndex >= characterConfigCount)
+        return false;
+
+    // 获取指针
+    Character *e = &enemies[enemyCount];
+
+    // 加载配置数据
+    e->config = characterConfigs[configIndex];
+    e->hp = e->config.baseHp;
+    e->atk = e->config.baseAtk;
+    e->speed = e->config.baseSpeed;
+
+    // 初始化位置和状态
+    e->x = x;
+    e->y = y;
+    e->moveTimer = 0; // 计时器归零
+
+    // 清理 Buff 和特殊状态
+    // 清除之前怪物的残留 Buff
+    for (int i = 0; i < MAX_ACTIVE_BUFFS; i++)
+    {
+        e->buffs[i].active = false;
+        e->buffs[i].type = NONE;
+        e->buffs[i].timer = 0;
+        e->buffs[i].value = 0;
+    }
+
+    // 初始化其他可能存在的状态
+    e->canPenetrateObstacles = false;
+
+    // 计数器 +1
+    enemyCount++;
+    return true;
+}
+
 void SpawnDirector()
 {
-    if (enemyCount >= MAX_ENEMIES_COUNT)
-        return;
-    
-    spawnEnemyTimer++;
+    if (enemyCount < MAX_ENEMIES_COUNT)
+    {
+        spawnEnemyTimer++;
+    }
+
+    if (itemCount < MAX_ITEMS_COUNT)
+    {
+        spawnItemTimer++;
+    }
 
     // 难度控制：Level 枚举影响
-    // EASY: 基础240帧刷一只
-    // MEDIUM: 基础150帧刷一只
-    // HARD: 基础90帧刷一只
-    int baseRate = 150;
+    // EASY: 基础8s刷一只怪 10s刷一件物品
+    // MEDIUM: 基础5s刷一只怪 7s刷一件物品
+    // HARD: 基础3s刷一只怪 5s刷一件物品
+    int baseEnemyRate = SEC(5);
+    int baseItemRate = SEC(7);
     if (gameLevel == EASY)
-        baseRate = 240;
+    {
+        baseEnemyRate = SEC(8);
+        baseItemRate = SEC(10);
+    }
     else if (gameLevel == HARD)
-        baseRate = 90;
+    {
+        baseEnemyRate = SEC(3);
+        baseItemRate = SEC(5);
+    }
 
-    int minRate = 30;
+    int minEnemyRate = SEC(3);
+    int minItemRate = SEC(5);
     if (gameLevel == EASY)
-        minRate = 60;
+    {
+        minEnemyRate = SEC(4);
+        minItemRate = SEC(6);
+    }
     else if (gameLevel == HARD)
-        minRate = 10;
+    {
+        minEnemyRate = SEC(1);
+        minItemRate = SEC(2);
+    }
 
     // 随着生存时间减少刷新间隔 (每存活10秒，间隔减少5帧)
-    int currentRate = baseRate - (survivalSeconds / 10) * 5;
-    if (currentRate < minRate)
-        currentRate = minRate;
+    int currentEnemyRate = baseEnemyRate - (survivalSeconds / 10) * 5;
+    int currentItemRate = baseItemRate - (survivalSeconds / 10) * 5;
+    if (currentEnemyRate < minEnemyRate)
+        currentEnemyRate = minEnemyRate;
+    if (currentItemRate < minItemRate)
+        currentItemRate = minItemRate;
 
-    if (spawnEnemyTimer % currentRate == 0)
+    if (spawnEnemyTimer >= currentEnemyRate)
     {
         // 在视口外生成
         int x, y;
@@ -401,13 +527,98 @@ void SpawnDirector()
             }
 
             // 必须离玩家一定距离
-            if (abs(x - player.x) + abs(y - player.y) < minDistFormPlayerToSpawn)
+            if (abs(x - player.x) + abs(y - player.y) < minDistFormPlayerToSpawnEnemy)
             {
                 tries++;
                 continue;
             }
 
             // 怪物生成逻辑
+            if (characterConfigCount > 1)
+            {
+                // 计算总权重 (跳过 index 0 的玩家)
+                int totalWeight = 0;
+                for (int i = 1; i < characterConfigCount; i++)
+                {
+                    totalWeight += characterConfigs[i].spwanRate;
+                }
+
+                // 取一个随机数
+                int r = rand() % totalWeight;
+
+                // 遍历寻找落在哪各区间
+                int selectedIndex = 1;
+                for (int i = 1; i < characterConfigCount; i++)
+                {
+                    r -= characterConfigs[i].spwanRate;
+                    if (r < 0)
+                    {
+                        selectedIndex = i;
+                        break;
+                    }
+                }
+
+                SpawnEnemy(selectedIndex, x, y);
+            }
+
+            break;
+        }
+    }
+
+    if (spawnItemTimer >= currentItemRate)
+    {
+        // 在视口外生成
+        int x, y;
+        int tries = 0;
+        spawnItemTimer = 0;
+
+        while (tries < 10) // 尝试十次生成
+        {
+            x = rand() % MAP_WIDTH;
+            y = rand() % MAP_HEIGHT;
+
+            // 必须是地板
+            if (worldMap[y][x] == TILE_WALL)
+            {
+                tries++;
+                continue;
+            }
+
+            // 必须离玩家一定距离
+            if (abs(x - player.x) + abs(y - player.y) < minDistFormPlayerToSpawnItem)
+            {
+                tries++;
+                continue;
+            }
+
+            // 物品生成逻辑
+            if (itemConfigCount > 0)
+            {
+                // 计算总权重
+                int totalWeight = 0;
+                for (int i = 0; i < itemConfigCount; i++)
+                {
+                    totalWeight += itemConfigs[i].spawnRate;
+                }
+
+                // 随机
+                int r = rand() % totalWeight;
+
+                // 选择
+                int selectedIndex = 0;
+                for (int i = 0; i < itemConfigCount; i++)
+                {
+                    r -= itemConfigs[i].spawnRate;
+                    if (r < 0)
+                    {
+                        selectedIndex = i;
+                        break;
+                    }
+                }
+
+                SpawnItem(selectedIndex, x, y);
+            }
+
             break;
         }
     }
@@ -434,11 +645,14 @@ void DrawUI()
     sprintf(buf, "怪物: %d", enemyCount);
     DrawStr(UI_START_X + 2, 10, buf);
 
+    sprintf(buf, "物品: %d", itemCount);
+    DrawStr(UI_START_X + 2, 12, buf);
+
     char *levelStr = "中等";
     if (gameLevel == EASY)
         levelStr = "简单";
     if (gameLevel == HARD)
         levelStr = "困难";
     sprintf(buf, "难度: %s", levelStr);
-    DrawStr(UI_START_X + 2, 12, buf);
+    DrawStr(UI_START_X + 2, 14, buf);
 }
