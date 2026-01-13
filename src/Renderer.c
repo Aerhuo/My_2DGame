@@ -95,15 +95,20 @@ void FlushScreen()
     COORD pos = {0, 0};
     SetConsoleCursorPosition(hOut, pos);
 
-    // 逐行打印
-    for (int y = 0; y < SCREEN_HEIGHT; y++)
-    {
-        printf("%.*s", SCREEN_WIDTH, screen[y]);
+    // 
+    static char outputBuffer[(SCREEN_WIDTH + 1) * SCREEN_HEIGHT + 1];
+    int p = 0; // 缓冲区的指针（下标）
 
-        // 避免最后一行换行导致滚动
-        if (y < SCREEN_HEIGHT - 1)
-        {
-            putchar('\n');
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
+            outputBuffer[p++] = screen[y][x]; // 把画布内容填进去
         }
+
+        if (y != SCREEN_HEIGHT - 1)
+            outputBuffer[p++] = '\n'; // 换行
     }
+    outputBuffer[p] = '\0'; // 字符串结束标志
+
+    // 输出到控制台
+    fwrite(outputBuffer, 1, p, stdout); // 使用fwrite加快速度
 }
