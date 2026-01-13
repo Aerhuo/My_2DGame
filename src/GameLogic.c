@@ -15,6 +15,7 @@ int frameCount = 0;
 int survivalSeconds = 0;
 
 int minDistFormPlayerToSpawn = 20;
+int spawnEnemyTimer = 0;
 
 typedef struct
 {
@@ -358,6 +359,8 @@ void SpawnDirector()
 {
     if (enemyCount >= MAX_ENEMIES_COUNT)
         return;
+    
+    spawnEnemyTimer++;
 
     // 难度控制：Level 枚举影响
     // EASY: 基础240帧刷一只
@@ -380,12 +383,14 @@ void SpawnDirector()
     if (currentRate < minRate)
         currentRate = minRate;
 
-    if (frameCount % currentRate == 0)
+    if (spawnEnemyTimer % currentRate == 0)
     {
         // 在视口外生成
         int x, y;
         int tries = 0;
-        while (tries < 10)
+        spawnEnemyTimer = 0;
+
+        while (tries < 10) // 尝试十次生成
         {
             x = rand() % MAP_WIDTH;
             y = rand() % MAP_HEIGHT;

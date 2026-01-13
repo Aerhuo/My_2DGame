@@ -1,6 +1,9 @@
+#include <math.h>
+#include <string.h>
 #include "GameData.h"
+#include "GameLogic.h"
 #include "Renderer.h"
-#include<string.h>
+
 const ItemConfig itemConfigs[] = {
     // 特殊物品(增加下波敌人出现的时间)
     {"闹钟", '@', 0, 0, 0, 0, 25},
@@ -56,14 +59,15 @@ int enemyCount = 0;
 // 移除怪物的标准实现
 void RemoveEnemy(int index)
 {
-    if (index < 0 || index >= enemyCount) return;
+    if (index < 0 || index >= enemyCount)
+        return;
 
     // 如果要删除的不是最后一个，就把最后一个移过来覆盖它
     if (index != enemyCount - 1)
     {
         enemies[index] = enemies[enemyCount - 1];
     }
-    
+
     // 数量减一
     enemyCount--;
 }
@@ -71,7 +75,8 @@ void RemoveEnemy(int index)
 // 移除物品的标准实现
 void RemoveItem(int index)
 {
-    if (index < 0 || index >= itemCount) return;
+    if (index < 0 || index >= itemCount)
+        return;
 
     if (index != itemCount - 1)
     {
@@ -103,6 +108,20 @@ void AddBuff(Character *target, BuffType type, int duration, int value)
             target->buffs[i].type = type;
             target->buffs[i].timer = duration;
             target->buffs[i].value = value;
+
+            // 添加特殊效果
+            switch (type)
+            {
+            case ADD_ENEMY_SPAWN_TIME:
+                spawnEnemyTimer += SEC(value); // 增加敌人生成时间
+                break;
+            case NO_OBSTACLE:
+                target->canPenetrateObstacles = true;
+                break;
+            default:
+                break;
+            }
+
             return;
         }
     }
@@ -130,6 +149,18 @@ void RemoveBuff(Character *target, BuffType type)
         {
             target->buffs[i].active = false;
         }
+
+        // 移除特殊效果
+            switch (type)
+            {
+            case ADD_ENEMY_SPAWN_TIME:
+                break;
+            case NO_OBSTACLE:
+                target->canPenetrateObstacles = false;
+                break;
+            default:
+                break;
+            }
     }
 }
 
@@ -156,7 +187,7 @@ void ItemApply(ItemConfig item)
 {
     if (item.addHp > 0)
     {
-        player.hp = min(player.hp + item.addHp, player.config.baseHp);
+        player.hp = fmin(player.hp + item.addHp, player.config.baseHp);
     }
     if (item.addAtk > 0)
     {
@@ -167,19 +198,15 @@ void ItemApply(ItemConfig item)
         player.speed += item.addSpeed;
     }
 
-    if(item.duration > 0)
+    if (item.duration > 0)
     {
-        if(!strcmp(item.name, "闹钟"))
+        if (!strcmp(item.name, "闹钟"))
         {
             AddBuff(&player, ADD_ENEMY_SPAWN_TIME, item.duration, 0);
         }
-        else if(!strcmp(item.name, "宿舍钥匙"))
+        else if (!strcmp(item.name, "宿舍钥匙"))
         {
             AddBuff(&player, NO_OBSTACLE, item.duration, 0);
-        }
-        else if(!strcmp(item.name, "吹风机"))
-        {
-            AddBuff(&player, RANGE_ATTACK, item.duration, 0);
         }
     }
 }
