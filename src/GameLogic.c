@@ -647,15 +647,20 @@ void DrawUI()
 
     sprintf(buf, "生命: %.0f", player.hp);
     DrawStr(UI_START_X + 2, 6, buf);
-
-    sprintf(buf, "存活: %d 秒", survivalSeconds);
+    
+    sprintf(buf, "攻击: %.0f", player.atk);
     DrawStr(UI_START_X + 2, 8, buf);
 
-    sprintf(buf, "怪物: %d", enemyCount);
+    sprintf(buf, "速度: %.0f", player.speed);
     DrawStr(UI_START_X + 2, 10, buf);
 
-    sprintf(buf, "物品: %d", itemCount);
+    sprintf(buf, "存活: %d 秒", survivalSeconds);
     DrawStr(UI_START_X + 2, 12, buf);
+    sprintf(buf, "怪物: %d", enemyCount);
+    DrawStr(UI_START_X + 2, 14, buf);
+
+    sprintf(buf, "物品: %d", itemCount);
+    DrawStr(UI_START_X + 2, 16, buf);
 
     char *levelStr = "中等";
     if (gameLevel == EASY)
@@ -663,5 +668,5 @@ void DrawUI()
     if (gameLevel == HARD)
         levelStr = "困难";
     sprintf(buf, "难度: %s", levelStr);
-    DrawStr(UI_START_X + 2, 14, buf);
+    DrawStr(UI_START_X + 2, 18, buf);
 }
