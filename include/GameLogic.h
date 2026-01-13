@@ -20,6 +20,7 @@ extern TileType worldMap[MAP_HEIGHT][MAP_WIDTH];
 extern int cameraX, cameraY;
 extern int survivalSeconds;
 extern int spawnEnemyTimer;
+extern int spawnItemTimer;
 
 // 初始化一局新游戏 (生成地图、重置玩家)
 void InitGameLogic();
