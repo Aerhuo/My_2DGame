@@ -3,6 +3,7 @@
 #include <math.h>
 #include <conio.h>
 #include <string.h>
+#include <windows.h>
 #include "GameLogic.h"
 #include "GameData.h"
 #include "Renderer.h"
@@ -63,7 +64,7 @@ bool UpdateGameLogic()
     frameCount++;
     if (frameCount % FPS == 0)
         survivalSeconds++;
-    
+
     // 累加计时器
     player.moveTimer++;
 
@@ -73,44 +74,52 @@ bool UpdateGameLogic()
     if (playerMoveThreshold < 1)
         playerMoveThreshold = 1;
 
-    // 处理输入
-    if (_kbhit())
+    // 处理输入 (用 GetAsyncKeyState 实现丝滑移动)
+    // 只有当计时器准备好时，才去检查键盘状态
+    if (player.moveTimer >= playerMoveThreshold)
     {
-        char key = _getch();
+        int dx = 0;
+        int dy = 0;
+        bool tryMove = false;
 
-        // 只有当计时器 超过 阈值时，才允许移动
-        if (player.moveTimer >= playerMoveThreshold)
+        // (0x8000 表示按键当前处于按下状态)
+        if (GetAsyncKeyState('W') & 0x8000)
         {
-            bool moved = false;
+            dx = 0;
+            dy = -1;
+            tryMove = true;
+        }
+        else if (GetAsyncKeyState('S') & 0x8000)
+        {
+            dx = 0;
+            dy = 1;
+            tryMove = true;
+        }
+        else if (GetAsyncKeyState('A') & 0x8000)
+        {
+            dx = -1;
+            dy = 0;
+            tryMove = true;
+        }
+        else if (GetAsyncKeyState('D') & 0x8000)
+        {
+            dx = 1;
+            dy = 0;
+            tryMove = true;
+        }
 
-            if (key == 'w' || key == 'W')
-            {
-                MovePlayer(0, -1);
-                moved = true;
-            }
-            else if (key == 's' || key == 'S')
-            {
-                MovePlayer(0, 1);
-                moved = true;
-            }
-            else if (key == 'a' || key == 'A')
-            {
-                MovePlayer(-1, 0);
-                moved = true;
-            }
-            else if (key == 'd' || key == 'D')
-            {
-                MovePlayer(1, 0);
-                moved = true;
-            }
+        if (tryMove)
+        {
+            MovePlayer(dx, dy);
 
-            // 只有真正发生移动尝试时，才重置计时器
-            if (moved)
-            {
-                player.moveTimer = 0;
-            }
+            // 只有真正触发了移动逻辑，才重置计时器
+            player.moveTimer = 0;
         }
     }
+
+    // 清空残留的缓冲区
+    while (_kbhit())
+        _getch();
 
     // 更新 AI 寻路图 (每10帧计算一次)
     if (frameCount % 10 == 0)
