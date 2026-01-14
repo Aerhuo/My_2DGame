@@ -113,7 +113,7 @@ void AddBuff(Character *target, BuffType type, int duration, int value)
             switch (type)
             {
             case ADD_ENEMY_SPAWN_TIME:
-                spawnEnemyTimer += SEC(value); // 增加敌人生成时间
+                spawnEnemyTimer -= SEC(value); // 增加敌人生成时间
                 break;
             case NO_OBSTACLE:
                 target->canPenetrateObstacles = true;
