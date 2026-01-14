@@ -377,7 +377,7 @@ void RunIntroFrame(GameState *state)
 
 // 绘制标题
 DrawStrCenter(2, "========================================");
-DrawStrCenter(3, "             《李伟峰梦游记》游戏介绍");
+DrawStrCenter(3, "李伟峰梦游记 游戏介绍");
 
 char titleLine[100];
 if (currentPage == INTRO_PAGE_BACKGROUND)
@@ -437,7 +437,6 @@ else
     DrawStrCenter(lineY++, "9. 电脑：    增加0.5点移动速度 (低概率)");
     DrawStrCenter(lineY++, "10. 手机：   增加1点移动速度 (低概率)");
     DrawStrCenter(lineY++, "11. 宿舍钥匙： 10秒内无视场景障碍 (低概率)");
-    DrawStrCenter(lineY++, "12. 吹风机：  30秒内获得远程攻击 (攻击力减半)");
     lineY++;
     
     // 确保不会超出屏幕，分页显示怪物

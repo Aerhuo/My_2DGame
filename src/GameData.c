@@ -26,7 +26,6 @@ const ItemConfig itemConfigs[] = {
 
     // 时间限制类物品
     {"宿舍钥匙", '&', 0, 0, 0, SEC(10), 25}, // 10秒穿墙
-    {"吹风机", '%', 0, 0, 0, SEC(30), 25},   // 30秒远程攻击
 };
 
 const int itemConfigCount = sizeof(itemConfigs) / sizeof(itemConfigs[0]);
