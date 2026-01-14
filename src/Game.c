@@ -93,15 +93,17 @@ char *menuOptions[] = {
     "开始游戏",
     "设置",
     "分数榜",
+    "游戏介绍",
     "退出游戏"};
 
 char *selectedMenuOptions[] = {
     "> 开始游戏 <",
     "> 设置 <",
     "> 分数榜 <",
+    "> 游戏介绍 <",
     "> 退出游戏 <"};
 
-const int menuOptionCount = 4;
+const int menuOptionCount = 5;
 const char title[] = "== 李伟峰梦境大冒险 ==";
 
 Level gameLevel = MEDIUM;
@@ -137,6 +139,9 @@ void RunMenuFrame(GameState *state)
                 *state = STATE_Score;
                 break;
             case 3:
+                *state = STATE_INTRO;
+                break;
+            case 4:
                 *state = STATE_EXIT;
                 break;
             }
@@ -358,5 +363,128 @@ void RunScoreFrame(GameState *state)
     {
         _getch(); // 清除按键
         *state = STATE_MENU;
+    }
+}
+
+// Game.c - 在文件末尾，RunScoreFrame函数之后添加
+
+
+// 游戏介绍帧逻辑
+void RunIntroFrame(GameState *state)
+{
+    static IntroPage currentPage = INTRO_PAGE_BACKGROUND;
+    
+
+// 绘制标题
+DrawStrCenter(2, "========================================");
+DrawStrCenter(3, "             《李伟峰梦游记》游戏介绍");
+
+char titleLine[100];
+if (currentPage == INTRO_PAGE_BACKGROUND)
+    sprintf(titleLine, "【游戏背景与目标】");
+else
+    sprintf(titleLine, "【游戏内容介绍】");
+    
+DrawStrCenter(4, titleLine);
+DrawStrCenter(5, "========================================");
+
+int lineY = 7;
+
+if (currentPage == INTRO_PAGE_BACKGROUND)
+{
+    // 背景介绍内容
+    DrawStrCenter(lineY++, "================= 游戏背景 =================");
+    lineY++;
+    DrawStrCenter(lineY++, "在游戏中你将扮演主角：李伟峰");
+    DrawStrCenter(lineY++, "李伟峰做了一个奇怪的梦，梦中许多害怕的事物变成了怪物");
+    DrawStrCenter(lineY++, "同时也有许多喜欢的事物出现，帮助他抵御攻击");
+    DrawStrCenter(lineY++, "你的任务：收集喜欢的道具，同时对怪物进行反击");
+    lineY++;
+    DrawStrCenter(lineY++, "================= 游戏规则 =================");
+    lineY++;
+    DrawStrCenter(lineY++, "• 每过7秒：场上刷新随机道具");
+    DrawStrCenter(lineY++, "• 每过6秒：刷新一个怪物");
+    DrawStrCenter(lineY++, "• 头号敌人：重修（BOSS级怪物）");
+    DrawStrCenter(lineY++, "• 重要规则：一定要远离床！！！");
+    DrawStrCenter(lineY++, "  （对李伟峰来说，床十分危险！）");
+    lineY++;
+    DrawStrCenter(lineY++, "================= 温馨提示 =================");
+    lineY++;
+    DrawStrCenter(lineY++, "当你遇到困难时，想想李伟峰会怎么做");
+    DrawStrCenter(lineY++, "开始你的梦境之旅吧！");
+    DrawStrCenter(lineY++, "本作创作目的：缅怀我们的李伟峰同学");
+    DrawStrCenter(lineY++, "本作为3人小组作业，如有雷同，纯属他人抄袭");
+    DrawStrCenter(lineY++, "更多游戏内容，敬请期待后续更新...");
+}
+else
+{
+    // 内容介绍
+    DrawStrCenter(lineY++, "================= 游戏主角 =================");
+    lineY++;
+    DrawStrCenter(lineY++, "• 李伟峰");
+    DrawStrCenter(lineY++, "  攻击力：10 | 生命值：100 | 移动速度：2.5");
+    lineY++;
+    DrawStrCenter(lineY++, "================= 道具介绍 =================");
+    lineY++;
+    DrawStrCenter(lineY++, "1. 闹钟：    下一个怪物刷新时间增加5秒 (低概率)");
+    DrawStrCenter(lineY++, "2. 普通枕头：  增加5点攻击力");
+    DrawStrCenter(lineY++, "3. 舒适枕头：  增加15点攻击力");
+    DrawStrCenter(lineY++, "4. 黄金枕头：  增加50点攻击力 (低概率)");
+    DrawStrCenter(lineY++, "5. 食堂包子：  增加5点生命值");
+    DrawStrCenter(lineY++, "6. 食堂套餐烤肉：增加10点生命值");
+    DrawStrCenter(lineY++, "7. 烤肉：    增加50点生命值 (低概率)");
+    DrawStrCenter(lineY++, "8. 手表：    增加0.25点移动速度");
+    DrawStrCenter(lineY++, "9. 电脑：    增加0.5点移动速度 (低概率)");
+    DrawStrCenter(lineY++, "10. 手机：   增加1点移动速度 (低概率)");
+    DrawStrCenter(lineY++, "11. 宿舍钥匙： 10秒内无视场景障碍 (低概率)");
+    DrawStrCenter(lineY++, "12. 吹风机：  30秒内获得远程攻击 (攻击力减半)");
+    lineY++;
+    
+    // 确保不会超出屏幕，分页显示怪物
+    if (lineY + 15 > SCREEN_HEIGHT) {
+        lineY = 7; // 重置位置，或者你可以添加分页逻辑
+    }
+    
+    DrawStrCenter(lineY++, "================= 怪物介绍 =================");
+    lineY++;
+    DrawStrCenter(lineY++, "【普通怪物】");
+    DrawStrCenter(lineY++, "1. 早八：     攻击5  | 生命80  | 速度1.0");
+    DrawStrCenter(lineY++, "2. 晚自习：   攻击7  | 生命100 | 速度1.0");
+    DrawStrCenter(lineY++, "3. 周六早八：  攻击5  | 生命120 | 速度1.0");
+    DrawStrCenter(lineY++, "4. 周日晚自习：攻击10 | 生命120 | 速度1.25");
+    lineY++;
+    DrawStrCenter(lineY++, "【精英怪物】");
+    DrawStrCenter(lineY++, "5. 体测：     攻击20 | 生命220 | 速度1.5");
+    DrawStrCenter(lineY++, "6. 考试：     攻击25 | 生命200 | 速度2.25");
+    DrawStrCenter(lineY++, "7. 挂科：     攻击22 | 生命240 | 速度3.25");
+    lineY++;
+    DrawStrCenter(lineY++, "【特殊怪物】");
+    DrawStrCenter(lineY++, "8. 假期：     攻击5  | 生命300 | 速度0.5");
+    DrawStrCenter(lineY++, "  (击败高概率掉落低爆率道具)");
+    DrawStrCenter(lineY++, "【BOSS】");
+    DrawStrCenter(lineY++, "9. 重修：     攻击40 | 生命1000 | 速度10.5");
+}
+    
+    // 绘制操作说明
+    lineY = lineY + 2;
+    DrawStrCenter(lineY++, "========================================");
+    DrawStrCenter(lineY++, "操作说明：");
+    DrawStrCenter(lineY++, "A/D键：切换页面 | 回车/ESC键：返回主菜单");
+    DrawStrCenter(lineY++, "========================================");
+    
+    // 处理输入（不直接改变状态，让函数持续运行）
+    if (_kbhit())
+    {
+        char key = _getch();
+        if (key == 'a' || key == 'A' || key == 'd' || key == 'D')
+        {
+            // A/D键切换页面
+            currentPage = (currentPage == INTRO_PAGE_BACKGROUND) ? 
+                          INTRO_PAGE_CONTENT : INTRO_PAGE_BACKGROUND;
+        }
+        else if (key == '\r' || key == 27) // 回车或ESC键返回主菜单
+        {
+            *state = STATE_MENU;
+        }
     }
 }
