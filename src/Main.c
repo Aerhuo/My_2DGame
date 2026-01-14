@@ -41,6 +41,10 @@ int main()
             case STATE_Score:
             RunScoreFrame(&currentState);
             break;
+            
+            case STATE_INTRO:
+            RunIntroFrame(&currentState);
+            break;
         }
 
         FlushScreen();
