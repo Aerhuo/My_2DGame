@@ -4,6 +4,7 @@
 #define MAX_ENEMIES_COUNT 100
 #define MAX_ITEMS_COUNT 50
 #define MAX_ACTIVE_BUFFS 8
+#define MAX_SPEED 12.0f
 #define FPS 30
 #define SEC(s) ((int)((s) * FPS))
 

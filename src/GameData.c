@@ -32,7 +32,7 @@ const ItemConfig itemConfigs[] = {
 const int itemConfigCount = sizeof(itemConfigs) / sizeof(itemConfigs[0]);
 
 // 名字 显示符号 基础生命值 基础攻击力 基础速度 (每秒移动的格子数) 生成权重
-// 名字 显示符号 基础生命值 基础攻击力 基础速度 (每秒移动的格子数) 生成权重
+
 const CharacterConfig characterConfigs[] = {
     {"三角洲高手", '@', 100.0f, 20.0f, 3.5f, 0},    // 玩家
     {"早八", 'M', 80, 5, 0.5, 6000},               // 普通怪物
@@ -197,7 +197,7 @@ void ItemApply(ItemConfig item)
     }
     if (item.addSpeed > 0)
     {
-        player.speed += item.addSpeed;
+        player.speed = fmin(player.speed + item.addSpeed, MAX_SPEED);
     }
 
     if (item.duration > 0)
