@@ -134,6 +134,9 @@ bool UpdateGameLogic()
     // 移动摄像机
     UpdateCamera();
 
+    // 更新BUFF状态
+    UpdateBuffs(&player);
+
     return player.hp > 0;
 }
 
@@ -516,7 +519,7 @@ void SpawnDirector()
     if (currentItemRate < minItemRate)
         currentItemRate = minItemRate;
 
-    if (spawnEnemyTimer >= currentEnemyRate)
+    if (spawnEnemyTimer >= currentEnemyRate) // 生成怪物逻辑
     {
         // 在视口外生成
         int x, y;
@@ -574,7 +577,7 @@ void SpawnDirector()
         }
     }
 
-    if (spawnItemTimer >= currentItemRate)
+    if (spawnItemTimer >= currentItemRate) // 生成物品逻辑
     {
         // 在视口外生成
         int x, y;
@@ -651,7 +654,7 @@ void DrawUI()
     sprintf(buf, "攻击: %.0f", player.atk);
     DrawStr(UI_START_X + 2, 8, buf);
 
-    sprintf(buf, "速度: %.0f", player.speed);
+    sprintf(buf, "速度: %.2f", player.speed);
     DrawStr(UI_START_X + 2, 10, buf);
 
     sprintf(buf, "存活: %d 秒", survivalSeconds);
